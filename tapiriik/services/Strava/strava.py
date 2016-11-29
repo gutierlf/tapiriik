@@ -208,14 +208,14 @@ class StravaService(ServiceBase):
             "hub.challenge": req.GET["hub.challenge"]
         }))
 
-    def DownloadActivity(self, svcRecord, activity):
+    def DownloadActivity(self, svcRecord, activity, http_getter=strava_http):
         if activity.ServiceData["Manual"]:  # I should really add a param to DownloadActivity for this value as opposed to constantly doing this
             # We've got as much information as we're going to get - we need to copy it into a Lap though.
             activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
             return activity
         activityID = activity.ServiceData["ActivityID"]
 
-        streamdata = strava_http.getActivity(activityID, self._apiHeaders(svcRecord))
+        streamdata = http_getter.getActivity(activityID, self._apiHeaders(svcRecord))
         if streamdata.status_code == 401:
             raise APIException("No authorization to download activity", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
 
