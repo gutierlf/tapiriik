@@ -212,7 +212,7 @@ class StravaService(ServiceBase):
             return activity
         activityID = activity.ServiceData["ActivityID"]
 
-        streamdata = requests.get("https://www.strava.com/api/v3/activities/" + str(activityID) + "/streams/time,altitude,heartrate,cadence,watts,temp,moving,latlng,distance,velocity_smooth", headers=self._apiHeaders(svcRecord))
+        streamdata = self._getActivity(activityID, self._apiHeaders(svcRecord))
         if streamdata.status_code == 401:
             raise APIException("No authorization to download activity", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
 
@@ -293,6 +293,12 @@ class StravaService(ServiceBase):
             lap.Waypoints.append(waypoint)
 
         return activity
+
+    def _getActivity(self, activityID, headers):
+        streamdata = requests.get("https://www.strava.com/api/v3/activities/" + str(
+            activityID) + "/streams/time,altitude,heartrate,cadence,watts,temp,moving,latlng,distance,velocity_smooth",
+                                  headers=headers)
+        return streamdata
 
     def UploadActivity(self, serviceRecord, activity):
         logger.info("Activity tz " + str(activity.TZ) + " dt tz " + str(activity.StartTime.tzinfo) + " starttime " + str(activity.StartTime))
