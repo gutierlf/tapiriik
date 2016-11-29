@@ -18,6 +18,10 @@ import re
 import time
 import json
 
+STRAVA_ACTIVITY_DOWNLOAD_STREAMS = "/streams/time,altitude,heartrate,cadence,watts,temp,moving,latlng,distance,velocity_smooth"
+
+STRAVA_API_URL = "https://www.strava.com/api/v3/activities/"
+
 logger = logging.getLogger(__name__)
 
 class StravaService(ServiceBase):
@@ -295,10 +299,8 @@ class StravaService(ServiceBase):
         return activity
 
     def _getActivity(self, activityID, headers):
-        streamdata = requests.get("https://www.strava.com/api/v3/activities/" + str(
-            activityID) + "/streams/time,altitude,heartrate,cadence,watts,temp,moving,latlng,distance,velocity_smooth",
-                                  headers=headers)
-        return streamdata
+        activityURL = STRAVA_API_URL + str(activityID) + STRAVA_ACTIVITY_DOWNLOAD_STREAMS
+        return requests.get(activityURL, headers=headers)
 
     def UploadActivity(self, serviceRecord, activity):
         logger.info("Activity tz " + str(activity.TZ) + " dt tz " + str(activity.StartTime.tzinfo) + " starttime " + str(activity.StartTime))
