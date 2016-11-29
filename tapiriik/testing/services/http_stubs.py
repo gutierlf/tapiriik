@@ -1,6 +1,12 @@
+import collections
+Response = collections.namedtuple('Response', 'status_code')
+
 class Http401Returner(object):
     @staticmethod
     def getActivity(activityID, headers):
-        class StatusCode401(object):
-            status_code = 401
-        return StatusCode401()
+        return Response(status_code=401)
+
+class HttpNoJsonReturner(object):
+    @staticmethod
+    def getActivity(activityID, headers):
+        return Response(status_code=200)
