@@ -5,10 +5,12 @@ from tapiriik.database import cachedb
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Waypoint, WaypointType, Location, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.fit import FITIO
+from tapiriik.services.Strava import strava_http
 
 from django.core.urlresolvers import reverse
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
+
 import calendar
 import requests
 import os
@@ -18,9 +20,6 @@ import re
 import time
 import json
 
-STRAVA_ACTIVITY_DOWNLOAD_STREAMS = "/streams/time,altitude,heartrate,cadence,watts,temp,moving,latlng,distance,velocity_smooth"
-
-STRAVA_API_URL = "https://www.strava.com/api/v3/activities/"
 
 logger = logging.getLogger(__name__)
 
@@ -216,7 +215,7 @@ class StravaService(ServiceBase):
             return activity
         activityID = activity.ServiceData["ActivityID"]
 
-        streamdata = getActivity(activityID, self._apiHeaders(svcRecord))
+        streamdata = strava_http.getActivity(activityID, self._apiHeaders(svcRecord))
         if streamdata.status_code == 401:
             raise APIException("No authorization to download activity", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
 
@@ -381,8 +380,3 @@ class StravaService(ServiceBase):
         headers = self._apiHeaders(serviceRecord)
         del_res = requests.delete("https://www.strava.com/api/v3/activities/%d" % uploadId, headers=headers)
         del_res.raise_for_status()
-
-
-def getActivity(activityID, headers):
-    activityURL = STRAVA_API_URL + str(activityID) + STRAVA_ACTIVITY_DOWNLOAD_STREAMS
-    return requests.get(activityURL, headers=headers)
