@@ -10,17 +10,17 @@ class ResponseWithJson(object):
     def json(self):
         return self._json
 
-class Http401Returner(object):
+class Http401Getter(object):
     @staticmethod
     def getActivity(activityID, headers):
         return ResponseWithoutJson(status_code=401)
 
-class HttpNoJsonReturner(object):
+class HttpNoJsonGetter(object):
     @staticmethod
     def getActivity(activityID, headers):
         return ResponseWithoutJson(status_code=200)
 
-class HttpRecordNotFoundReturner(object):
+class HttpRecordNotFoundGetter(object):
     @staticmethod
     def getActivity(activityID, headers):
         return ResponseWithJson({"message": "Record Not Found"})

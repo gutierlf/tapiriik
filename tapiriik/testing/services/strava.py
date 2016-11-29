@@ -1,5 +1,5 @@
 from tapiriik.testing.testtools import TapiriikTestCase, TestTools
-from tapiriik.testing.services.http_stubs import Http401Returner, HttpNoJsonReturner, HttpRecordNotFoundReturner
+from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter
 
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
@@ -14,15 +14,15 @@ class StravaServiceTests(TapiriikTestCase):
 
     def testStatusCode401RaisesAPIException(self):
         self.assertDownloadActivityRaisesAPIException(
-            Http401Returner, "No authorization to download activity")
+            Http401Getter, "No authorization to download activity")
 
     def testMissingJsonRaisesAPIException(self):
         self.assertDownloadActivityRaisesAPIException(
-            HttpNoJsonReturner, "Stream data returned is not JSON")
+            HttpNoJsonGetter, "Stream data returned is not JSON")
 
     def testRecordNotFoundMessageRaisesAPIException(self):
         self.assertDownloadActivityRaisesAPIException(
-            HttpRecordNotFoundReturner, "Could not find activity")
+            HttpRecordNotFoundGetter, "Could not find activity")
 
     def assertDownloadActivityRaisesAPIException(self, http_getter, message):
         with self.assertRaises(APIException) as cm:
