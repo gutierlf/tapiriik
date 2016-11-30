@@ -1,11 +1,11 @@
 from tapiriik.testing.testtools import TapiriikTestCase, TestTools
 from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
-    HttpErrorInDownloadedDataGetter
+    HttpErrorInDownloadedDataGetter, FileLoader
 
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
 
-class StravaServiceTests(TapiriikTestCase):
+class StravaServiceDownloadActivityTests(TapiriikTestCase):
     def setUp(self):
         svc = TestTools.create_mock_service("Strava")
         self.svcRecord = TestTools.create_mock_svc_record(svc)
@@ -36,3 +36,11 @@ class StravaServiceTests(TapiriikTestCase):
                                              http_getter=http_getter)
         self.assertEqual(cm.exception.Message, message)
 
+    def testActivityDataStoredInSingleLap(self):
+        self.assertEqual(len(self.activity.Laps), 0)
+        self.activity.ServiceData["ActivityID"] = 692697310
+        StravaService().DownloadActivity(self.svcRecord, self.activity, http_getter=FileLoader)
+        self.assertEqual(len(self.activity.Laps), 1)
+        self.assertEqual(self.activity.Laps[0].Stats, self.activity.Stats)
+        self.assertEqual(self.activity.Laps[0].StartTime, self.activity.StartTime)
+        self.assertEqual(self.activity.Laps[0].EndTime, self.activity.EndTime)
