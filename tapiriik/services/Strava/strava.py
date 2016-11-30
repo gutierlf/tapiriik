@@ -233,9 +233,6 @@ class StravaService(ServiceBase):
         hasDistance = "distance" in ridedata and len(ridedata["distance"]) > 0
         hasVelocity = "velocity_smooth" in ridedata and len(ridedata["velocity_smooth"]) > 0
 
-        if "error" in ridedata:
-            raise APIException("Strava error " + ridedata["error"])
-
         inPause = False
 
         waypointCt = len(ridedata["time"])
@@ -381,4 +378,7 @@ def _getActivity(activityID, headers, http_getter=strava_http):
         raise APIException("Stream data returned is not JSON")
     if "message" in streamdata and streamdata["message"] == "Record Not Found":
         raise APIException("Could not find activity")
+    errorMessage = [stream["data"] for stream in streamdata if stream["type"] == "error"]
+    if errorMessage:
+        raise APIException("Strava error " + errorMessage[0])
     return streamdata
