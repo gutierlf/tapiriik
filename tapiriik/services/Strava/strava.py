@@ -215,7 +215,7 @@ class StravaService(ServiceBase):
             return activity
         activityID = activity.ServiceData["ActivityID"]
 
-        streamdata = _getActivity(activityID, self._apiHeaders(svcRecord), http_getter)
+        streamdata = strava_http.parseValidJson(http_getter.getActivity(activityID, self._apiHeaders(svcRecord)))
 
         ridedata = {}
         for stream in streamdata:
@@ -368,17 +368,3 @@ class StravaService(ServiceBase):
         del_res = requests.delete("https://www.strava.com/api/v3/activities/%d" % uploadId, headers=headers)
         del_res.raise_for_status()
 
-def _getActivity(activityID, headers, http_getter=strava_http):
-    response = http_getter.getActivity(activityID, headers)
-    if response.status_code == 401:
-        raise APIException("No authorization to download activity", block=True, user_exception=UserException(UserExceptionType.Authorization, intervention_required=True))
-    try:
-        streamdata = response.json()
-    except:
-        raise APIException("Stream data returned is not JSON")
-    if "message" in streamdata and streamdata["message"] == "Record Not Found":
-        raise APIException("Could not find activity")
-    errorMessage = [stream["data"] for stream in streamdata if stream["type"] == "error"]
-    if errorMessage:
-        raise APIException("Strava error " + errorMessage[0])
-    return streamdata
