@@ -24,3 +24,8 @@ class HttpRecordNotFoundGetter(object):
     @staticmethod
     def getActivity(activityID, headers):
         return ResponseWithJson({"message": "Record Not Found"})
+
+class HttpErrorInDownloadedDataGetter(object):
+    @staticmethod
+    def getActivity(activityID, headers):
+        return ResponseWithJson([{"type": "error", "data": "the error message"}])

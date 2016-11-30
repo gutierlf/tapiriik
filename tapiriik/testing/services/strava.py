@@ -1,5 +1,6 @@
 from tapiriik.testing.testtools import TapiriikTestCase, TestTools
-from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter
+from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
+    HttpErrorInDownloadedDataGetter
 
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
@@ -23,6 +24,10 @@ class StravaServiceTests(TapiriikTestCase):
     def testRecordNotFoundMessageRaisesAPIException(self):
         self.assertDownloadActivityRaisesAPIException(
             HttpRecordNotFoundGetter, "Could not find activity")
+
+    def testErrorInDownloadedDataRaisesAPIException(self):
+        self.assertDownloadActivityRaisesAPIException(
+            HttpErrorInDownloadedDataGetter, "Strava error the error message")
 
     def assertDownloadActivityRaisesAPIException(self, http_getter, message):
         with self.assertRaises(APIException) as cm:
