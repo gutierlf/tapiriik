@@ -42,23 +42,30 @@ class TapiriikTestCase(TestCase):
     def assertLapsEqual(self, la, lb):
         self.assertEqual(la.StartTime, lb.StartTime)
         self.assertEqual(la.EndTime, lb.EndTime)
-        self.assertEqual(len(la.Waypoints), len(lb.Waypoints))
-        for idx in range(len(la.Waypoints)):
-            wpa = la.Waypoints[idx]
-            wpb = lb.Waypoints[idx]
-            self.assertEqual(wpa.Timestamp.astimezone(pytz.utc), wpb.Timestamp.astimezone(pytz.utc))
-            self.assertEqual(wpa.Location.Latitude, wpb.Location.Latitude)
-            self.assertEqual(wpa.Location.Longitude, wpb.Location.Longitude)
-            self.assertEqual(wpa.Location.Altitude, wpb.Location.Altitude)
-            self.assertEqual(wpa.Type, wpb.Type)
-            self.assertEqual(wpa.HR, wpb.HR)
-            self.assertEqual(wpa.Calories, wpb.Calories)
-            self.assertEqual(wpa.Power, wpb.Power)
-            self.assertEqual(wpa.Cadence, wpb.Cadence)
-            self.assertEqual(wpa.Temp, wpb.Temp)
-            self.assertEqual(wpa.Location, wpb.Location)
-            self.assertEqual(wpa, wpb)
+        self.assertWaypointsListsEqual(la.Waypoints, lb.Waypoints)
 
+    def assertWaypointsListsEqual(self, waypoints_a, waypoints_b):
+        self.assertEqual(len(waypoints_a), len(waypoints_b))
+        for idx in range(len(waypoints_a)):
+            wpa = waypoints_a[idx]
+            wpb = waypoints_b[idx]
+            self.assertWaypointsEqual(wpa, wpb)
+
+    def assertWaypointsEqual(self, wpa, wpb):
+        wpa_timestamp = wpa.Timestamp.astimezone(pytz.utc)
+        wpb_timestamp = wpb.Timestamp.astimezone(pytz.utc)
+        self.assertEqual(wpa_timestamp, wpb_timestamp)
+        self.assertEqual(wpa.Location.Latitude, wpb.Location.Latitude)
+        self.assertEqual(wpa.Location.Longitude, wpb.Location.Longitude)
+        self.assertEqual(wpa.Location.Altitude, wpb.Location.Altitude)
+        self.assertEqual(wpa.Type, wpb.Type)
+        self.assertEqual(wpa.HR, wpb.HR)
+        self.assertEqual(wpa.Calories, wpb.Calories)
+        self.assertEqual(wpa.Power, wpb.Power)
+        self.assertEqual(wpa.Cadence, wpb.Cadence)
+        self.assertEqual(wpa.Temp, wpb.Temp)
+        self.assertEqual(wpa.Location, wpb.Location)
+        self.assertEqual(wpa, wpb)
 
 class TestTools:
     def create_mock_user():
