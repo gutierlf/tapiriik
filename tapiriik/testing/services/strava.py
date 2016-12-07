@@ -4,7 +4,7 @@ from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter
 
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
-from tapiriik.services.interchange import Waypoint, WaypointType, Location
+from tapiriik.services.interchange import Waypoint, WaypointType, Location, Lap
 
 from datetime import timedelta
 import pytz
@@ -41,6 +41,15 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
                                              self.activity,
                                              http_getter=http_getter)
         self.assertEqual(cm.exception.Message, message)
+
+    def testManualActivitySetsSimpleLap(self):
+        self.activity.ServiceData["Manual"] = True
+        StravaService().DownloadActivity(self.svcRecord, self.activity)
+        self.assertEqual(len(self.activity.Laps), 1)
+        expected_lap = Lap(startTime=self.activity.StartTime,
+                           endTime=self.activity.EndTime,
+                           stats=self.activity.Stats)
+        self.assertLapsEqual(self.activity.Laps[0], expected_lap)
 
     def testActivityDataStoredInSingleLap(self):
         self.assertEqual(len(self.activity.Laps), 0)

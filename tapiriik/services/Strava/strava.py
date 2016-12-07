@@ -212,15 +212,15 @@ class StravaService(ServiceBase):
         if activity.ServiceData["Manual"]:  # I should really add a param to DownloadActivity for this value as opposed to constantly doing this
             # We've got as much information as we're going to get - we need to copy it into a Lap though.
             activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
-            return activity
-        
-        response = http_getter.getActivity(activity.ServiceData["ActivityID"], self._apiHeaders(svcRecord))
-        streamdata = strava_http.parseValidJson(response)
-        waypoints = self._convertStreamsToWaypointsList(streamdata, activity.StartTime)
-
-        lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime) # Strava doesn't support laps, but we need somewhere to put the waypoints.
-        activity.Laps = [lap]
-        lap.Waypoints = waypoints
+        else:
+            response = http_getter.getActivity(activity.ServiceData["ActivityID"], self._apiHeaders(svcRecord))
+            streamdata = strava_http.parseValidJson(response)
+            waypoints = self._convertStreamsToWaypointsList(streamdata, activity.StartTime)
+            # Strava doesn't support laps, but we need somewhere to put the waypoints.
+            activity.Laps = [(Lap(stats=activity.Stats,
+                                  startTime=activity.StartTime,
+                                  endTime=activity.EndTime,
+                                  waypointList=waypoints))]
 
         return activity
 
