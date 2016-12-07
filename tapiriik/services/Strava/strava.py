@@ -213,17 +213,19 @@ class StravaService(ServiceBase):
             # We've got as much information as we're going to get - we need to copy it into a Lap though.
             activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
             return activity
-        activityID = activity.ServiceData["ActivityID"]
-
-        streamdata = strava_http.parseValidJson(http_getter.getActivity(activityID, self._apiHeaders(svcRecord)))
-
-        ridedata = {}
-        for stream in streamdata:
-            ridedata[stream["type"]] = stream["data"]
+        
+        response = http_getter.getActivity(activity.ServiceData["ActivityID"], self._apiHeaders(svcRecord))
+        streamdata = strava_http.parseValidJson(response)
+        waypoints = self._convertStreamsToWaypointsList(streamdata, activity.StartTime)
 
         lap = Lap(stats=activity.Stats, startTime=activity.StartTime, endTime=activity.EndTime) # Strava doesn't support laps, but we need somewhere to put the waypoints.
         activity.Laps = [lap]
-        lap.Waypoints = []
+        lap.Waypoints = waypoints
+
+        return activity
+
+    def _convertStreamsToWaypointsList(self, streamdata, startTime):
+        ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
         hasHR = "heartrate" in ridedata and len(ridedata["heartrate"]) > 0
         hasCadence = "cadence" in ridedata and len(ridedata["cadence"]) > 0
@@ -234,11 +236,11 @@ class StravaService(ServiceBase):
         hasVelocity = "velocity_smooth" in ridedata and len(ridedata["velocity_smooth"]) > 0
 
         inPause = False
-
         waypointCt = len(ridedata["time"])
+        waypoints = []
         for idx in range(0, waypointCt - 1):
 
-            waypoint = Waypoint(activity.StartTime + timedelta(0, ridedata["time"][idx]))
+            waypoint = Waypoint(startTime + timedelta(0, ridedata["time"][idx]))
             if "latlng" in ridedata:
                 latlng = ridedata["latlng"][idx]
                 waypoint.Location = Location(latlng[0], latlng[1], None)
@@ -261,10 +263,10 @@ class StravaService(ServiceBase):
                 waypoint.Type = WaypointType.Start
             elif idx == waypointCt - 2:
                 waypoint.Type = WaypointType.End
-            elif idx < waypointCt - 2 and ridedata["moving"][idx+1] and inPause:
+            elif idx < waypointCt - 2 and ridedata["moving"][idx + 1] and inPause:
                 waypoint.Type = WaypointType.Resume
                 inPause = False
-            elif idx < waypointCt - 2 and not ridedata["moving"][idx+1] and not inPause:
+            elif idx < waypointCt - 2 and not ridedata["moving"][idx + 1] and not inPause:
                 waypoint.Type = WaypointType.Pause
                 inPause = True
 
@@ -280,9 +282,8 @@ class StravaService(ServiceBase):
                 waypoint.Speed = ridedata["velocity_smooth"][idx]
             if hasDistance:
                 waypoint.Distance = ridedata["distance"][idx]
-            lap.Waypoints.append(waypoint)
-
-        return activity
+            waypoints.append(waypoint)
+        return waypoints
 
     def UploadActivity(self, serviceRecord, activity):
         logger.info("Activity tz " + str(activity.TZ) + " dt tz " + str(activity.StartTime.tzinfo) + " starttime " + str(activity.StartTime))
