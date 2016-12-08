@@ -237,17 +237,16 @@ class StravaService(ServiceBase):
 
         ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
-        hasCadence = "cadence" in ridedata and len(ridedata["cadence"]) > 0
-        hasTemp = "temp" in ridedata and len(ridedata["temp"]) > 0
-        hasPower = ("watts" in ridedata and len(ridedata["watts"]) > 0)
-        hasDistance = "distance" in ridedata and len(ridedata["distance"]) > 0
-        hasVelocity = "velocity_smooth" in ridedata and len(ridedata["velocity_smooth"]) > 0
-
         latlngs = ridedata.get('latlng', [])
         altitudes = [float(altitude) for altitude in ridedata.get('altitude', [])]
         locations = [make_location(latlng, altitude)
                      for (latlng, altitude) in itertools.zip_longest(latlngs, altitudes)]
         hrs = ridedata.get('heartrate')
+        cadences = ridedata.get('cadence')
+        temps = ridedata.get('temp')
+        powers = ridedata.get('watts')
+        velocities = ridedata.get('velocity_smooth')
+        distances = ridedata.get('distance')
 
         inPause = False
         waypointCt = len(ridedata["time"])
@@ -277,16 +276,16 @@ class StravaService(ServiceBase):
 
             if hrs:
                 waypoint.HR = hrs[idx]
-            if hasCadence:
-                waypoint.Cadence = ridedata["cadence"][idx]
-            if hasTemp:
-                waypoint.Temp = ridedata["temp"][idx]
-            if hasPower:
-                waypoint.Power = ridedata["watts"][idx]
-            if hasVelocity:
-                waypoint.Speed = ridedata["velocity_smooth"][idx]
-            if hasDistance:
-                waypoint.Distance = ridedata["distance"][idx]
+            if cadences:
+                waypoint.Cadence = cadences[idx]
+            if temps:
+                waypoint.Temp = temps[idx]
+            if powers:
+                waypoint.Power = powers[idx]
+            if velocities:
+                waypoint.Speed = velocities[idx]
+            if distances:
+                waypoint.Distance = distances[idx]
             waypoints.append(waypoint)
         return waypoints
 
