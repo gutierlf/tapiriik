@@ -61,9 +61,18 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
         self.assertEqual(self.activity.Laps[0].EndTime, self.activity.EndTime)
 
     def testStreamProcessingFacts(self):
-        self.activity.ServiceData["ActivityID"] = TEST_ACTIVITY_ID
+        self._testStreamProcessingFacts(TEST_ACTIVITY_ID)
+
+    def testLatLng(self):
+        self._testStreamProcessingFacts('latlng')
+
+    def testLatLngWithZeros(self):
+        self._testStreamProcessingFacts('latlng.with_zeros')
+
+    def _testStreamProcessingFacts(self, filename):
+        self.activity.ServiceData["ActivityID"] = filename
         self.activity.StartTime = self.activity.StartTime.replace(tzinfo=pytz.utc)
-        streamdata = FileLoader.getActivity(TEST_ACTIVITY_ID, None).json()
+        streamdata = FileLoader.getActivity(filename, None).json()
         expected_waypoints = self.convertStreamsToWaypointsList(streamdata, self.activity.StartTime)
         StravaService().DownloadActivity(self.svcRecord, self.activity, http_getter=FileLoader)
         actual_waypoints = self.activity.Laps[0].Waypoints
