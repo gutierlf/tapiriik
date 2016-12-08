@@ -19,6 +19,7 @@ import pytz
 import re
 import time
 import json
+import itertools
 
 
 logger = logging.getLogger(__name__)
@@ -225,12 +226,14 @@ class StravaService(ServiceBase):
         return activity
 
     def _convertStreamsToWaypointsList(self, streamdata, startTime):
-        def make_location(latlng):
-            if all(ll == 0 for ll in latlng):
-                location = Location(None, None, None)
+        def make_location(latlng, altitude):
+            if latlng is None or all(ll == 0 for ll in latlng):
+                lat = None
+                lng = None
             else:
-                location = Location(latlng[0], latlng[1], None)
-            return location
+                lat = latlng[0]
+                lng = latlng[1]
+            return Location(lat, lng, altitude)
 
         ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
@@ -238,11 +241,13 @@ class StravaService(ServiceBase):
         hasCadence = "cadence" in ridedata and len(ridedata["cadence"]) > 0
         hasTemp = "temp" in ridedata and len(ridedata["temp"]) > 0
         hasPower = ("watts" in ridedata and len(ridedata["watts"]) > 0)
-        hasAltitude = "altitude" in ridedata and len(ridedata["altitude"]) > 0
         hasDistance = "distance" in ridedata and len(ridedata["distance"]) > 0
         hasVelocity = "velocity_smooth" in ridedata and len(ridedata["velocity_smooth"]) > 0
 
-        locations = [make_location(latlng) for latlng in ridedata.get('latlng', [])]
+        latlngs = [latlng for latlng in ridedata.get('latlng', [])]
+        altitudes = [float(altitude) for altitude in ridedata.get('altitude', [])]
+        locations = [make_location(latlng, altitude)
+                     for (latlng, altitude) in itertools.zip_longest(latlngs, altitudes)]
 
         inPause = False
         waypointCt = len(ridedata["time"])
@@ -252,11 +257,6 @@ class StravaService(ServiceBase):
             waypoint = Waypoint(startTime + timedelta(0, ridedata["time"][idx]))
             if locations:
                 waypoint.Location = locations[idx]
-
-            if hasAltitude:
-                if not waypoint.Location:
-                    waypoint.Location = Location(None, None, None)
-                waypoint.Location.Altitude = float(ridedata["altitude"][idx])
 
             # When pausing, Strava sends this format:
             # idx = 100 ; time = 1000; moving = true

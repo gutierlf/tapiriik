@@ -72,6 +72,9 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
     def testLatLngWithZeros(self):
         self._testStreamProcessingFacts('latlng.with_zeros')
 
+    def testAltitude(self):
+        self._testStreamProcessingFacts('altitude')
+
     def _testStreamProcessingFacts(self, filename):
         self.activity.ServiceData["ActivityID"] = filename
         self.activity.StartTime = self.activity.StartTime.replace(tzinfo=pytz.utc)
