@@ -225,6 +225,13 @@ class StravaService(ServiceBase):
         return activity
 
     def _convertStreamsToWaypointsList(self, streamdata, startTime):
+        def make_location(latlng):
+            if all(ll == 0 for ll in latlng):
+                location = Location(None, None, None)
+            else:
+                location = Location(latlng[0], latlng[1], None)
+            return location
+
         ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
         hasHR = "heartrate" in ridedata and len(ridedata["heartrate"]) > 0
@@ -235,18 +242,16 @@ class StravaService(ServiceBase):
         hasDistance = "distance" in ridedata and len(ridedata["distance"]) > 0
         hasVelocity = "velocity_smooth" in ridedata and len(ridedata["velocity_smooth"]) > 0
 
+        locations = [make_location(latlng) for latlng in ridedata.get('latlng', [])]
+
         inPause = False
         waypointCt = len(ridedata["time"])
         waypoints = []
         for idx in range(0, waypointCt - 1):
 
             waypoint = Waypoint(startTime + timedelta(0, ridedata["time"][idx]))
-            if "latlng" in ridedata:
-                latlng = ridedata["latlng"][idx]
-                waypoint.Location = Location(latlng[0], latlng[1], None)
-                if waypoint.Location.Longitude == 0 and waypoint.Location.Latitude == 0:
-                    waypoint.Location.Longitude = None
-                    waypoint.Location.Latitude = None
+            if locations:
+                waypoint.Location = locations[idx]
 
             if hasAltitude:
                 if not waypoint.Location:

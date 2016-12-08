@@ -55,9 +55,6 @@ class TapiriikTestCase(TestCase):
         wpa_timestamp = wpa.Timestamp.astimezone(pytz.utc)
         wpb_timestamp = wpb.Timestamp.astimezone(pytz.utc)
         self.assertEqual(wpa_timestamp, wpb_timestamp)
-        self.assertEqual(wpa.Location.Latitude, wpb.Location.Latitude)
-        self.assertEqual(wpa.Location.Longitude, wpb.Location.Longitude)
-        self.assertEqual(wpa.Location.Altitude, wpb.Location.Altitude)
         self.assertEqual(wpa.Type, wpb.Type)
         self.assertEqual(wpa.HR, wpb.HR)
         self.assertEqual(wpa.Calories, wpb.Calories)
@@ -65,6 +62,10 @@ class TapiriikTestCase(TestCase):
         self.assertEqual(wpa.Cadence, wpb.Cadence)
         self.assertEqual(wpa.Temp, wpb.Temp)
         self.assertEqual(wpa.Location, wpb.Location)
+        if wpa.Location:
+            self.assertEqual(wpa.Location.Latitude, wpb.Location.Latitude)
+            self.assertEqual(wpa.Location.Longitude, wpb.Location.Longitude)
+            self.assertEqual(wpa.Location.Altitude, wpb.Location.Altitude)
         self.assertEqual(wpa, wpb)
 
 class TestTools:

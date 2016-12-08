@@ -63,6 +63,9 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
     def testStreamProcessingFacts(self):
         self._testStreamProcessingFacts(TEST_ACTIVITY_ID)
 
+    def testJustTimeAndMoving(self):
+        self._testStreamProcessingFacts('just_time_and_moving')
+
     def testLatLng(self):
         self._testStreamProcessingFacts('latlng')
 
