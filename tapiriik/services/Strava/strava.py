@@ -267,36 +267,20 @@ class StravaService(ServiceBase):
                  WaypointType.Regular
                  for idx in range(0, waypointCt - 1)]
 
-        hrs = ridedata.get('heartrate')
-        cadences = ridedata.get('cadence')
-        temps = ridedata.get('temp')
-        powers = ridedata.get('watts')
-        velocities = ridedata.get('velocity_smooth')
-        distances = ridedata.get('distance')
+        hrs = ridedata.get('heartrate', [])
+        cadences = ridedata.get('cadence', [])
+        temps = ridedata.get('temp', [])
+        powers = ridedata.get('watts', [])
+        velocities = ridedata.get('velocity_smooth', [])
+        distances = ridedata.get('distance', [])
 
-        waypoints = []
-        for idx in range(0, waypointCt - 1):
+        waypoints = [Waypoint(timestamp=timestamp, location=location, ptType=the_type,
+                              hr=hr, cadence=cadence, temp=temp, power=power,
+                              speed=speed, distance=distance)
+                     for (timestamp, location, the_type, hr, cadence, temp, power, speed, distance)
+                     in itertools.zip_longest(times, locations, types, hrs, cadences, temps, powers, velocities, distances)]
 
-            waypoint = Waypoint(times[idx])
-            if locations:
-                waypoint.Location = locations[idx]
-
-            waypoint.Type = types[idx]
-
-            if hrs:
-                waypoint.HR = hrs[idx]
-            if cadences:
-                waypoint.Cadence = cadences[idx]
-            if temps:
-                waypoint.Temp = temps[idx]
-            if powers:
-                waypoint.Power = powers[idx]
-            if velocities:
-                waypoint.Speed = velocities[idx]
-            if distances:
-                waypoint.Distance = distances[idx]
-            waypoints.append(waypoint)
-        return waypoints
+        return waypoints[0:-1]
 
     def UploadActivity(self, serviceRecord, activity):
         logger.info("Activity tz " + str(activity.TZ) + " dt tz " + str(activity.StartTime.tzinfo) + " starttime " + str(activity.StartTime))
