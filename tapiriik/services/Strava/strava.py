@@ -247,6 +247,8 @@ class StravaService(ServiceBase):
 
         ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
+        times = [startTime + timedelta(0, t) for t in ridedata['time']]
+
         latlngs = ridedata.get('latlng', [])
         altitudes = [float(altitude) for altitude in ridedata.get('altitude', [])]
         locations = [make_location(latlng, altitude)
@@ -275,7 +277,7 @@ class StravaService(ServiceBase):
         waypoints = []
         for idx in range(0, waypointCt - 1):
 
-            waypoint = Waypoint(startTime + timedelta(0, ridedata["time"][idx]))
+            waypoint = Waypoint(times[idx])
             if locations:
                 waypoint.Location = locations[idx]
 
