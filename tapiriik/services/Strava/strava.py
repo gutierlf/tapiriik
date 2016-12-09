@@ -235,12 +235,36 @@ class StravaService(ServiceBase):
                 lng = latlng[1]
             return Location(lat, lng, altitude)
 
+        def pairwise(iterable):
+            "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+            a, b = itertools.tee(iterable)
+            next(b, None)
+            return zip(a, b)
+
+        def get_type_when_pause_at_beginning(moving_list):
+            first_three_are_false = moving_list[0:3] == [False, False, False]
+            return WaypointType.Pause if first_three_are_false else WaypointType.Regular
+
         ridedata = {stream["type"]: stream["data"] for stream in streamdata}
 
         latlngs = ridedata.get('latlng', [])
         altitudes = [float(altitude) for altitude in ridedata.get('altitude', [])]
         locations = [make_location(latlng, altitude)
                      for (latlng, altitude) in itertools.zip_longest(latlngs, altitudes)]
+
+        waypointCt = len(ridedata["time"])
+
+        moving = ridedata['moving']
+        pause = [current == True and nxt == False for (current, nxt) in pairwise(moving)] + [False]
+        resume = [current == False and nxt == True for (current, nxt) in pairwise(moving)] + [False]
+        types = [WaypointType.Start if idx == 0 else
+                 get_type_when_pause_at_beginning(moving) if idx == 1 else
+                 WaypointType.End if idx == waypointCt - 2 else
+                 WaypointType.Pause if pause[idx] else
+                 WaypointType.Resume if resume[idx] else
+                 WaypointType.Regular
+                 for idx in range(0, waypointCt - 1)]
+
         hrs = ridedata.get('heartrate')
         cadences = ridedata.get('cadence')
         temps = ridedata.get('temp')
@@ -248,8 +272,6 @@ class StravaService(ServiceBase):
         velocities = ridedata.get('velocity_smooth')
         distances = ridedata.get('distance')
 
-        inPause = False
-        waypointCt = len(ridedata["time"])
         waypoints = []
         for idx in range(0, waypointCt - 1):
 
@@ -257,22 +279,7 @@ class StravaService(ServiceBase):
             if locations:
                 waypoint.Location = locations[idx]
 
-            # When pausing, Strava sends this format:
-            # idx = 100 ; time = 1000; moving = true
-            # idx = 101 ; time = 1001; moving = true  => convert to Pause
-            # idx = 102 ; time = 2001; moving = false => convert to Resume: (2001-1001) seconds pause
-            # idx = 103 ; time = 2002; moving = true
-
-            if idx == 0:
-                waypoint.Type = WaypointType.Start
-            elif idx == waypointCt - 2:
-                waypoint.Type = WaypointType.End
-            elif idx < waypointCt - 2 and ridedata["moving"][idx + 1] and inPause:
-                waypoint.Type = WaypointType.Resume
-                inPause = False
-            elif idx < waypointCt - 2 and not ridedata["moving"][idx + 1] and not inPause:
-                waypoint.Type = WaypointType.Pause
-                inPause = True
+            waypoint.Type = types[idx]
 
             if hrs:
                 waypoint.HR = hrs[idx]

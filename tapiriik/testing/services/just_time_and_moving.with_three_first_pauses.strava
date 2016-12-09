@@ -17,9 +17,9 @@
     {
       "type": "moving",
       "data": [
-          true,
-          true,
-          true,
+          false,
+          false,
+          false,
           true,
           true,
           true,
