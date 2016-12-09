@@ -8,7 +8,6 @@
           107.8,
           107.8,
           107.8,
-          107.8,
           107.8
       ],
       "series_type": "distance",
@@ -33,7 +32,6 @@
     {
       "type": "moving",
       "data": [
-          true,
           true,
           true,
           true,
