@@ -7,8 +7,8 @@ ResponseWithoutJson = collections.namedtuple('ResponseWithoutJson', 'status_code
 class ResponseWithJson(object):
     status_code = 200
 
-    def __init__(self, json=None):
-       self._json = json
+    def __init__(self, the_json=None):
+       self._json = the_json
 
     def json(self):
         return self._json
@@ -36,7 +36,8 @@ class HttpErrorInDownloadedDataGetter(object):
 class FileLoader(object):
     @staticmethod
     def getActivity(activityID, _):
-        filename = os.path.join(os.path.dirname(__file__), str(activityID) + ".strava")
+        filename = os.path.join(os.path.dirname(__file__),
+                                'test_data', str(activityID) + ".strava")
         with open(filename, "r") as the_file:
             text = the_file.read()
         return ResponseWithJson(json.loads(text))

@@ -1,13 +1,13 @@
-from tapiriik.testing.testtools import TapiriikTestCase, TestTools
-from tapiriik.testing.services.connection_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
-    HttpErrorInDownloadedDataGetter, FileLoader
+from datetime import timedelta
 
+import pytz
+
+from tapiriik.testing.testtools import TapiriikTestCase, TestTools
+from tapiriik.testing.services.Strava.connection_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
+    HttpErrorInDownloadedDataGetter, FileLoader
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
 from tapiriik.services.interchange import Waypoint, WaypointType, Location, Lap
-
-from datetime import timedelta
-import pytz
 
 TEST_ACTIVITY_ID = 692697310
 

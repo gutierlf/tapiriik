@@ -1,1 +1,1 @@
-from .strava import *
+from .Strava import *
