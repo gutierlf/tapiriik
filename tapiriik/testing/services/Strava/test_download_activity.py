@@ -4,7 +4,7 @@ import pytz
 
 from tapiriik.testing.testtools import TapiriikTestCase, TestTools
 from tapiriik.testing.services.Strava.connection_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
-    HttpErrorInDownloadedDataGetter, FileLoader, HttpGetterSpy
+    HttpErrorInDownloadedDataGetter, FileLoader
 from tapiriik.services.Strava import StravaService
 from tapiriik.services.api import APIException
 from tapiriik.services.interchange import Waypoint, WaypointType, Location, Lap
@@ -50,12 +50,6 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
                            endTime=self.activity.EndTime,
                            stats=self.activity.Stats)
         self.assertLapsEqual(self.activity.Laps[0], expected_lap)
-
-    def testApiHeaderUsesOAuthTokenCorrectly(self):
-        httpGetterSpy = HttpGetterSpy()
-        self.activity.ServiceData["ActivityID"] = TEST_ACTIVITY_ID
-        StravaService().DownloadActivity(self.svcRecord, self.activity, connection=httpGetterSpy)
-        self.assertTrue(httpGetterSpy.headers_correct)
 
     def testActivityDataStoredInSingleLap(self):
         self.assertEqual(len(self.activity.Laps), 0)

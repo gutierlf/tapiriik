@@ -1,4 +1,3 @@
-from tapiriik.services.Strava.connection import getActivityWithOAuthToken
 from tapiriik.settings import WEB_ROOT, STRAVA_CLIENT_SECRET, STRAVA_CLIENT_ID, STRAVA_RATE_LIMITS
 from tapiriik.services.service_base import ServiceAuthenticationType, ServiceBase
 from tapiriik.services.service_record import ServiceRecord
@@ -213,8 +212,8 @@ class StravaService(ServiceBase):
             # We've got as much information as we're going to get - we need to copy it into a Lap though.
             activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
         else:
-            oAuthToken = svcRecord.Authorization["OAuthToken"]
-            response = getActivityWithOAuthToken(activity, oAuthToken, connection)
+            response = connection.getActivity(activity.ServiceData["ActivityID"],
+                                              svcRecord.Authorization["OAuthToken"])
             waypoints = ActivityGateway(activity, response).waypoints
             # Strava doesn't support laps, but we need somewhere to put the waypoints.
             activity.Laps = [(Lap(stats=activity.Stats,
