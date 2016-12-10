@@ -1,5 +1,5 @@
 from tapiriik.testing.testtools import TapiriikTestCase, TestTools
-from tapiriik.testing.services.http_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
+from tapiriik.testing.services.connection_stubs import Http401Getter, HttpNoJsonGetter, HttpRecordNotFoundGetter, \
     HttpErrorInDownloadedDataGetter, FileLoader
 
 from tapiriik.services.Strava import StravaService
@@ -39,7 +39,7 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
         with self.assertRaises(APIException) as cm:
             StravaService().DownloadActivity(self.svcRecord,
                                              self.activity,
-                                             http_getter=http_getter)
+                                             connection=http_getter)
         self.assertEqual(cm.exception.Message, message)
 
     def testManualActivitySetsSimpleLap(self):
@@ -54,7 +54,7 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
     def testActivityDataStoredInSingleLap(self):
         self.assertEqual(len(self.activity.Laps), 0)
         self.activity.ServiceData["ActivityID"] = TEST_ACTIVITY_ID
-        StravaService().DownloadActivity(self.svcRecord, self.activity, http_getter=FileLoader)
+        StravaService().DownloadActivity(self.svcRecord, self.activity, connection=FileLoader)
         self.assertEqual(len(self.activity.Laps), 1)
         self.assertEqual(self.activity.Laps[0].Stats, self.activity.Stats)
         self.assertEqual(self.activity.Laps[0].StartTime, self.activity.StartTime)
@@ -85,7 +85,7 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
         self.activity.StartTime = self.activity.StartTime.replace(tzinfo=pytz.utc)
         streamdata = FileLoader.getActivity(filename, None).json()
         expected_waypoints = self.convertStreamsToWaypointsList(streamdata, self.activity.StartTime)
-        StravaService().DownloadActivity(self.svcRecord, self.activity, http_getter=FileLoader)
+        StravaService().DownloadActivity(self.svcRecord, self.activity, connection=FileLoader)
         actual_waypoints = self.activity.Laps[0].Waypoints
         self.assertWaypointsListsEqual(actual_waypoints, expected_waypoints)
 
