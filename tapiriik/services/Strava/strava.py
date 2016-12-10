@@ -5,7 +5,7 @@ from tapiriik.database import cachedb
 from tapiriik.services.interchange import UploadedActivity, ActivityType, ActivityStatistic, ActivityStatisticUnit, Lap
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.fit import FITIO
-from tapiriik.services.Strava import connection
+from tapiriik.services.Strava import connection as strava_conn
 from tapiriik.services.Strava.activity_gateway import ActivityGateway
 
 from django.core.urlresolvers import reverse
@@ -208,7 +208,7 @@ class StravaService(ServiceBase):
             "hub.challenge": req.GET["hub.challenge"]
         }))
 
-    def DownloadActivity(self, svcRecord, activity, connection=connection):
+    def DownloadActivity(self, svcRecord, activity, connection=strava_conn):
         if activity.ServiceData["Manual"]:  # I should really add a param to DownloadActivity for this value as opposed to constantly doing this
             # We've got as much information as we're going to get - we need to copy it into a Lap though.
             activity.Laps = [Lap(startTime=activity.StartTime, endTime=activity.EndTime, stats=activity.Stats)]
