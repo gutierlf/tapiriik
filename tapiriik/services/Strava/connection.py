@@ -10,3 +10,8 @@ def getActivity(activityID, headers):
 
 def apiHeader(oAuthToken):
     return {"Authorization": "access_token " + oAuthToken}
+
+def getActivityWithOAuthToken(activity, oAuthToken, connection):
+    headers = apiHeader(oAuthToken)
+    response = connection.getActivity(activity.ServiceData["ActivityID"], headers)
+    return response
