@@ -21,6 +21,7 @@ import re
 import time
 import json
 
+
 logger = logging.getLogger(__name__)
 
 class StravaService(ServiceBase):
@@ -97,7 +98,7 @@ class StravaService(ServiceBase):
            "https://www.strava.com/oauth/authorize?" + urlencode(params)
 
     def _apiHeaders(self, serviceRecord):
-        return {"Authorization": "access_token " + serviceRecord.Authorization["OAuthToken"]}
+        return strava_conn.apiHeader(serviceRecord.Authorization["OAuthToken"])
 
     def RetrieveAuthorizationToken(self, req, level):
         code = req.GET.get("code")

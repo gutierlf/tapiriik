@@ -7,3 +7,6 @@ def getActivity(activityID, headers):
     activityURL = STRAVA_API_URL + str(activityID) + STRAVA_ACTIVITY_DOWNLOAD_STREAMS
     response = requests.get(activityURL, headers=headers)
     return response
+
+def apiHeader(oAuthToken):
+    return {"Authorization": "access_token " + oAuthToken}
