@@ -6,7 +6,7 @@ from tapiriik.services.interchange import UploadedActivity, ActivityType, Activi
 from tapiriik.services.api import APIException, UserException, UserExceptionType, APIExcludeActivity
 from tapiriik.services.fit import FITIO
 from tapiriik.services.Strava import connection as strava_conn
-from tapiriik.services.Strava.activity_gateway import ActivityGateway
+from tapiriik.services.Strava import activity_gateway
 
 from django.core.urlresolvers import reverse
 from datetime import datetime, timedelta
@@ -214,7 +214,7 @@ class StravaService(ServiceBase):
         else:
             response = connection.getActivity(activity.ServiceData["ActivityID"],
                                               svcRecord.Authorization["OAuthToken"])
-            waypoints = ActivityGateway(activity, response).waypoints
+            waypoints = activity_gateway.get_waypoints(activity, response)
             # Strava doesn't support laps, but we need somewhere to put the waypoints.
             activity.Laps = [(Lap(stats=activity.Stats,
                                   startTime=activity.StartTime,
