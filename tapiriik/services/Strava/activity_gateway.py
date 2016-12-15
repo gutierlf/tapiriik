@@ -65,8 +65,18 @@ def _get_locations(latlngs, altitudes):
 
 def _get_types(moving):
     def get_type_for_second_element():
-        first_three_are_false = moving[0:3] == [False, False, False]
-        return WaypointType.Pause if first_three_are_false else WaypointType.Regular
+        normal_pause_rule = [
+            [True,  True,  False],
+            [False, True , False]
+        ]
+        special_cases = [
+            [False, False, False], # Paused prior to recording. Since first element always Start, put the Pause in second element
+            [True , False, False] # Begin pause with recording, but first element always Start, so put the Pause in the second element
+        ]
+        rules = normal_pause_rule + special_cases
+
+        is_pause = any(moving[0:3] == rule for rule in rules)
+        return WaypointType.Pause if is_pause else WaypointType.Regular
 
     pause  = [current == True and nxt == False
               for (current, nxt) in pairwise(moving)] + [False]

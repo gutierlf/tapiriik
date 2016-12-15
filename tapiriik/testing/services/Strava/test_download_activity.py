@@ -67,9 +67,11 @@ class StravaServiceDownloadActivityTests(TapiriikTestCase):
         self._testStreamProcessingFacts('just_time_and_moving')
 
     def testJustTimeAndMovingWithPauses(self):
-        self._testStreamProcessingFacts('just_time_and_moving.with_one_first_pause')
-        self._testStreamProcessingFacts('just_time_and_moving.with_two_first_pauses')
-        self._testStreamProcessingFacts('just_time_and_moving.with_three_first_pauses')
+        self._testStreamProcessingFacts('just_time_and_moving.true_true_false')
+        self._testStreamProcessingFacts('just_time_and_moving.false_true_false')
+        self._testStreamProcessingFacts('just_time_and_moving.false_false_false')
+        self._testStreamProcessingFacts('just_time_and_moving.true_false_false')
+        self._testStreamProcessingFacts('just_time_and_moving.with_middle_pause')
 
     def testLatLng(self):
         self._testStreamProcessingFacts('latlng')
