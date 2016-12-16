@@ -13,25 +13,30 @@ class ResponseWithJson(object):
     def json(self):
         return self._json
 
+HTTP_FOUR_OH_ONE_RESPONSE              = ResponseWithoutJson(status_code=401)
+HTTP_NO_JSON_RESPONSE                  = ResponseWithoutJson(status_code=200)
+HTTP_RECORD_NOT_FOUND_RESPONSE         = ResponseWithJson({"message": "Record Not Found"})
+HTTP_ERROR_IN_DOWNLOADED_DATA_RESPONSE = ResponseWithJson([{"type": "error", "data": "the error message"}])
+
 class Http401Getter(object):
     @staticmethod
-    def getActivity(activityID, headers):
-        return ResponseWithoutJson(status_code=401)
+    def getActivity(*_):
+        return HTTP_FOUR_OH_ONE_RESPONSE
 
 class HttpNoJsonGetter(object):
     @staticmethod
-    def getActivity(activityID, headers):
-        return ResponseWithoutJson(status_code=200)
+    def getActivity(*_):
+        return HTTP_NO_JSON_RESPONSE
 
 class HttpRecordNotFoundGetter(object):
     @staticmethod
-    def getActivity(activityID, headers):
-        return ResponseWithJson({"message": "Record Not Found"})
+    def getActivity(*_):
+        return HTTP_RECORD_NOT_FOUND_RESPONSE
 
 class HttpErrorInDownloadedDataGetter(object):
     @staticmethod
-    def getActivity(activityID, headers):
-        return ResponseWithJson([{"type": "error", "data": "the error message"}])
+    def getActivity(*_):
+        return HTTP_ERROR_IN_DOWNLOADED_DATA_RESPONSE
 
 class FileLoader(object):
     @staticmethod
