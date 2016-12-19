@@ -3,7 +3,7 @@ from .api import *
 from tapiriik.services.RunKeeper import RunKeeperService
 RunKeeper = RunKeeperService()
 from tapiriik.services.Strava import StravaService
-Strava = StravaService()
+Strava_ = StravaService()
 from tapiriik.services.Endomondo import EndomondoService
 Endomondo = EndomondoService()
 from tapiriik.services.Dropbox import DropboxService
